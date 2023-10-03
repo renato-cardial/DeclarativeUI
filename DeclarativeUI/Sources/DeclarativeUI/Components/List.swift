@@ -28,7 +28,8 @@ public class List: ElementView {
     private var elements: [ElementView] = []
     private var blockElements: (() -> [ElementView])
     private var blockSelectedRow: ((_ id: String, _ element: ElementView) -> Void)?
-    var listTableViewObject: ListTableViewObject = .init()
+    
+    var listTableViewObject: ListTableViewObject? = .init()
     
     private lazy var tableView: UITableView = FactoryView.makeTableView(
         delegate: listTableViewObject,
@@ -50,7 +51,7 @@ public class List: ElementView {
     
     func loadData() {
         elements = blockElements()
-        listTableViewObject.items = elements.get()
+        listTableViewObject?.items = elements.get()
         tableView.reloadData()
     }
     
@@ -62,13 +63,17 @@ public class List: ElementView {
     private func prepareTable() {
         tableView.register(ListCell.self, forCellReuseIdentifier: ListCell.identifier)
         prepareTableEvents()
-        references.append(listTableViewObject)
+        if let listTableViewObject = listTableViewObject {
+            references.append(listTableViewObject)
+        }
+        
     }
     
     private func prepareTableEvents(){
-        listTableViewObject.selectRow = { (tableView, indexPath) in
-            let item = self.listTableViewObject.items[indexPath.row]
-            self.blockSelectedRow?(item.identifier, item)
+        listTableViewObject?.selectRow = { [weak self] (tableView, indexPath) in
+            guard let listTableViewObject = self?.listTableViewObject else { return }
+            let item = listTableViewObject.items[indexPath.row]
+            self?.blockSelectedRow?(item.identifier, item)
         }
     }
         
