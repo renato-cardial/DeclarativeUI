@@ -21,7 +21,7 @@ import UIKit
 public class VStack: ElementView, RenderLayout {
     
     // MARK: - Public Properties
-    public var body: [ElementView] { elements() }
+    public var body: [ElementView] { elements().get() }
     public override var elementView: UIView { return contentView }
     public private(set) var _ignoreSafeArea: Bool = false
     public private(set) var verticalAlign: VerticalAlignment
@@ -31,6 +31,8 @@ public class VStack: ElementView, RenderLayout {
     internal lazy var stackView: UIStackView = FactoryView.makeStack()
     
     // MARK: - Private Properties
+    private var containerConstraint: ElementConstraint?
+    private var stackConstraint: ElementConstraint?
     private var margin: CGFloat
     private var padding: CGFloat
     private var elementViews: [String: ElementView] = [:]
@@ -55,6 +57,7 @@ public class VStack: ElementView, RenderLayout {
        - _ elements: Closure where you will put the elementViews to stack
     */
     public init(
+        id: String = UUID().uuidString,
         margin: CGFloat = DeclarativeUISettings.VStack.margin,
         padding: CGFloat = DeclarativeUISettings.VStack.padding,
         verticalAlignment: VerticalAlignment = DeclarativeUISettings.VStack.verticalAlignment,
@@ -66,10 +69,13 @@ public class VStack: ElementView, RenderLayout {
         self.verticalAlign = verticalAlignment
         self.elements = elements
         super.init()
+        
+        self.identifier = id
         stackView.spacing = spacing
         self.setupView()
     }
     
+    @discardableResult
     // MARK: - Override Methods
     /// Define the background color of this element
     /// - Parameter color: Color to background
@@ -78,12 +84,12 @@ public class VStack: ElementView, RenderLayout {
         containerView.backgroundColor = color
         return self
     }
-    
 }
 
 // MARK: - Public Methods
 public extension VStack {
     
+    @discardableResult
     /// Define the horizontal alignment of elements inside this Element
     /// - Parameter alignment: It's the same aligment of UIStackView
     /// - Returns: Self
@@ -92,6 +98,7 @@ public extension VStack {
         return self
     }
     
+    @discardableResult
     /// Define the vertical alignment this element on your parent view
     /// - Parameter vertical: The alignment position vertically
     /// - Returns: Self
@@ -100,22 +107,49 @@ public extension VStack {
         return self
     }
     
+    @discardableResult
     /// Define the space between the edge of parent view
-    /// - Parameter marginValue: Space value to margin
+    /// - Parameters:
+    ///   - marginValue: Space value to margin
+    ///   - animated: Change margin with animation
+    ///   - animationDuration: Duration of animation
     /// - Returns: Self
-    func margin(_ marginValue: CGFloat) -> Self {
+    func margin(
+        _ marginValue: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
         self.margin = marginValue
+        containerConstraint?.update(
+            marginValue,
+            anchors: ElementConstraint.Anchor.fill,
+            reference: .equal,
+            animation: animation
+        )
         return self
     }
     
+    @discardableResult
     /// Define the space between the content and the border of this element
-    /// - Parameter paddingValue: Space value to margin
+    /// - Parameters:
+    ///   - paddingValue: Space value to margin
+    ///   - animation: The configuration to animate padding constraints
     /// - Returns: Self
-    func padding(_ paddingValue: CGFloat) -> Self {
+    func padding(
+        _ paddingValue: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
         self.padding = paddingValue
+        
+        containerConstraint?.update(
+            paddingValue,
+            anchors: ElementConstraint.Anchor.fill,
+            reference: .equal,
+            animation: animation
+        )
         return self
     }
     
+    @discardableResult
     /// Define spacing between elements on stack
     /// - Parameter space: Space between elements
     /// - Returns: Self
@@ -124,6 +158,7 @@ public extension VStack {
         return self
     }
     
+    @discardableResult
     /// When called this method the constraints of this element will not consider safeArea
     /// - Returns: Self
     func ignoreSafeArea() -> Self {
@@ -135,9 +170,9 @@ public extension VStack {
 // MARK: - Private Methods
 private extension VStack {
     
-    func add(_ element: ElementView) {
+    func addElement(_ element: ElementView) {
         stackView.addArrangedSubview(element.elementView)
-        elementViews.updateValue(element, forKey: element.elementId)
+        elementViews.updateValue(element, forKey: element.identifier)
         element.afterEmbeded.forEach({ actionAfterEmbeded in
             actionAfterEmbeded()
         })
@@ -146,11 +181,11 @@ private extension VStack {
     func setupView()  {
         setupAlignment()
         setupConstraints()
-        addElements(elements())
+        addElements(elements().get())
     }
     
     func addElements(_ elements: [ElementView]) {
-        elements.forEach(add)
+        elements.forEach(addElement)
     }
     
     func setupAlignment() {
@@ -164,10 +199,12 @@ private extension VStack {
     }
     
     func setupConstraints() {
-        ElementConstraint(view: containerView, subview: stackView)
-            .fill(padding)
+        stackConstraint = ElementConstraint(
+            view: containerView,
+            subview: stackView
+        ).fill(padding)
         
-        let contentConstraint = ElementConstraint(
+        let containerConstraint = ElementConstraint(
             view: contentView,
             subview: containerView,
             safeArea: !_ignoreSafeArea
@@ -175,15 +212,17 @@ private extension VStack {
         
         switch verticalAlign {
         case .top:
-            contentConstraint.onTop(margin)
+            containerConstraint.onTop(margin)
         case .middle:
-            contentConstraint.onMiddle(margin)
+            containerConstraint.onMiddle(margin)
         case .bottom:
-            contentConstraint.onBottom(margin)
+            containerConstraint.onBottom(margin)
         case .center:
-            contentConstraint.center()
+            containerConstraint.center()
         case .fill:
-            contentConstraint.fill(margin)
+            containerConstraint.fill(margin)
         }
+        
+        self.containerConstraint = containerConstraint
     }
 }

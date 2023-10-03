@@ -33,6 +33,7 @@ public class ScrollView: ElementView, RenderLayout {
     
     // MARK: - Private Properties
     private let fillScreen: Bool
+    private let horizontal: Bool
     private var elements: [ElementView] = []
     private var blockElements: (() -> [ElementView])
     
@@ -44,20 +45,56 @@ public class ScrollView: ElementView, RenderLayout {
     ///   - _:  Closure where you will put the elementViews to scroll, is recomended use only one element link VStack, List or others that works like container of the others elements
     public init(
         _ fillScreen: Bool = false,
+        horizontal: Bool = false,
+        id: String = UUID().uuidString,
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         self.blockElements = elements
         self.fillScreen = fillScreen
+        self.horizontal = horizontal
         super.init()
+        self.identifier = id
         setupView()
     }
+}
+
+// MARK: - Public Methods
+public extension ScrollView {
+    
+    @discardableResult
+    /// Enable or not paging on scroll
+    /// - Parameter enable: Enable or Not
+    /// - Returns: Self
+    func pageEnabled(_ enable: Bool = true) -> Self {
+        scrollView.isPagingEnabled = enable
+        return self
+    }
+    
+    @discardableResult
+    /// Show or not horizontal indicator on scroll
+    /// - Parameter on: Show or Not
+    /// - Returns: Self
+    func horizontalIndicator(_ on: Bool = true) -> Self {
+        scrollView.showsHorizontalScrollIndicator = on
+        return self
+    }
+    
+    @discardableResult
+    /// show or not vertical indicator on scroll
+    /// - Parameter on: Show or Not
+    /// - Returns: Self
+    func verticalIndicator(_ on: Bool = true) -> Self {
+        scrollView.showsVerticalScrollIndicator = on
+        return self
+    }
+    
 }
 
 // MARK: - Private Methods
 private extension ScrollView {
     
     func setupView()  {
-        elements = blockElements()
+        elements = blockElements().get()
         
         let haveOnlyOneElement = elements.count == 1
         let firstElementVStack = elements.first as? VStack
@@ -65,6 +102,10 @@ private extension ScrollView {
         if haveOnlyOneElement, let element = firstElementVStack {
             setupConstraints(view: element.elementView)
             return
+        }
+        
+        if horizontal {
+            contentStackView.axis = .horizontal
         }
         
         setupConstraints(view: contentStackView)
@@ -76,9 +117,14 @@ private extension ScrollView {
     func setupConstraints(view: UIView) {
         let viewConstraint = ElementConstraint(view: scrollView, subview: view)
             .fill()
-            .centerX()
+            
+        if !horizontal {
+            viewConstraint.centerX()
+        } else {
+            scrollView.isPagingEnabled = true
+        }
         
-        if fillScreen {
+        if fillScreen || horizontal {
             viewConstraint.height(reference: .greater)
         }
     }

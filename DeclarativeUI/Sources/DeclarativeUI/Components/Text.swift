@@ -15,8 +15,9 @@ public class Text: ElementView {
     
     /// Initialize the Text object
     /// Parameter text: Text will be presented in this element
-    public init(_ text: String?) {
+    public init(_ text: String?, id: String = UUID().uuidString) {
         super.init()
+        identifier = id
         textLabel.text = text
     }
 }

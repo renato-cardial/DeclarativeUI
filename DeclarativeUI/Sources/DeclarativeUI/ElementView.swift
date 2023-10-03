@@ -8,12 +8,12 @@
 import UIKit
 
 /// The ElementView is the main object to use in our declarative view form to build layouts
-public class ElementView {
+public class ElementView: Identifiable {
     
     // MARK: - Public Properties
     
     /// Identifier the element uniquely
-    public lazy var elementId: String = UUID().uuidString
+    public var identifier: String = UUID().uuidString
     
     /// Respresent the UIView of elementView
     public var elementView: UIView { .init() }
@@ -21,6 +21,7 @@ public class ElementView {
     // MARK: - Internal Properties
     /// After this element to be added insider other element, this clousure will be called
     internal var afterEmbeded: [(() -> Void)]! = []
+    internal var references: [AnyObject] = []
     
     // MARK: - Methods that can be overridden
     /**
@@ -103,6 +104,22 @@ public extension ElementView {
     
 }
 
+public extension Sequence where Element == ElementView {
+    
+    func get() -> [ElementView] {
+        var elements: [ElementView] = []
+        forEach { element in
+            if let forEachObject = element as? ForEach {
+                elements.append(contentsOf: forEachObject.elements)
+            } else {
+                elements.append(element)
+            }
+        }
+        return elements
+    }
+    
+}
+
 // MARK: - Private Methods
 private extension ElementView {
     
@@ -153,3 +170,4 @@ private extension ElementView {
     }
     
 }
+

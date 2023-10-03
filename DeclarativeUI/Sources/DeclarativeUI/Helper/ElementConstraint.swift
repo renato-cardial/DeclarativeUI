@@ -9,110 +9,33 @@ import UIKit
 
 public class ElementConstraint {
     
-    private let subView: UIView
-    private let view: UIView
+    public private(set) var constraints: [NSLayoutConstraint] = []
+    let subView: UIView
+    let view: UIView
+    
     private let autoActive: Bool
     private let safeArea: Bool
-    public private(set) var constraints: [NSLayoutConstraint] = []
     
     public init(
         view: UIView,
         subview: UIView,
         autoActive: Bool = true,
-        safeArea: Bool = false
+        safeArea: Bool = false,
+        forceAddSubview: Bool = false
     ) {
         self.view = view
         self.subView = subview
         self.autoActive = autoActive
         self.safeArea = safeArea
         
+        if forceAddSubview {
+            subview.removeFromSuperview()
+        }
+        
         if subview.superview == nil {
             view.addSubview(subview)
         }
     }
-}
-
-// MARK: - Private Methods
-private extension ElementConstraint {
-    
-    func setDimension(
-        view: NSLayoutDimension,
-        subview: NSLayoutDimension,
-        constant: CGFloat,
-        reference: ElementConstraint.Reference
-    ) {
-        var constraint: NSLayoutConstraint!
-        switch reference {
-        case .equal:
-            constraint = subview.constraint(equalTo: view, constant: constant)
-        case .less:
-            constraint = subview.constraint(lessThanOrEqualTo: view, constant: constant)
-        case .greater:
-            constraint = subview.constraint(equalTo: view, constant: constant)
-        }
-        
-        if autoActive {
-            constraint.isActive = true
-        } else {
-            constraints.append(constraint)
-        }
-    }
-    
-    func setAxis<T: AnyObject>(
-        _ type: T.Type,
-        axis: NSLayoutAnchor<T>,
-        inAxis: NSLayoutAnchor<T>,
-        constant: CGFloat,
-        reference: ElementConstraint.Reference
-    ) {
-        var constraint: NSLayoutConstraint!
-        
-        switch reference {
-        case .equal:
-            constraint = axis.constraint(equalTo: inAxis, constant: constant)
-        case .less:
-            constraint = axis.constraint(lessThanOrEqualTo: inAxis, constant: constant)
-        case .greater:
-            constraint = axis.constraint(equalTo: inAxis, constant: constant)
-        }
-        
-        if autoActive {
-            constraint.isActive = true
-        } else {
-            constraints.append(constraint)
-        }
-    }
-    
-    func setYAxis(
-        axis: NSLayoutYAxisAnchor,
-        inAxis: NSLayoutYAxisAnchor,
-        constant: CGFloat,
-        reference: ElementConstraint.Reference
-    ) {
-        setAxis(
-            NSLayoutYAxisAnchor.self,
-            axis: axis,
-            inAxis: inAxis,
-            constant: constant,
-            reference: reference
-        )
-    }
-    
-    func setXAxis(
-        axis: NSLayoutXAxisAnchor,
-        inAxis: NSLayoutXAxisAnchor,
-        constant: CGFloat,
-        reference: ElementConstraint.Reference
-    ) {
-        setAxis(
-            NSLayoutXAxisAnchor.self,
-            axis: axis,
-            inAxis: inAxis,
-            constant: constant,
-            reference: reference
-        )
-    }
-    
 }
 
 // MARK: - Public Methods
@@ -121,6 +44,57 @@ public extension ElementConstraint {
     func active(_ on: Bool = true) {
         constraints.forEach { constraint in
             constraint.isActive = on
+        }
+    }
+    
+    func getAnchorId(anchor: ElementConstraint.Anchor, reference: ElementConstraint.Reference) -> String {
+        var axisDescription: String = ""
+        switch anchor {
+        case .top:
+            axisDescription = subView.topAnchor.description
+        case .bottom:
+            axisDescription = subView.bottomAnchor.description
+        case .leading:
+            axisDescription = subView.leadingAnchor.description
+        case .trailing:
+            axisDescription = subView.trailingAnchor.description
+        case .height:
+            axisDescription = subView.heightAnchor.description
+        case .width:
+            axisDescription = subView.widthAnchor.description
+        case .centerX:
+            axisDescription = subView.centerXAnchor.description
+        case .centerY:
+            axisDescription = subView.centerYAnchor.description
+        }
+        
+        return createIdentifier(axisDescription: axisDescription, reference: reference)
+    }
+    
+    func update(
+        _ constant: CGFloat,
+        anchors: [ElementConstraint.Anchor],
+        reference: ElementConstraint.Reference,
+        animation: ElementAnimation? = nil
+    ) {
+        anchors.forEach { anchor in
+            let identifier: String = getAnchorId(anchor: anchor, reference: reference)
+            let constraintToUpdate = constraints.first(where: { constraint in
+                constraint.identifier == identifier
+            })
+            
+            let negativeConstant: [ElementConstraint.Anchor] = [.bottom, .trailing]
+            if negativeConstant.contains(anchor) {
+                constraintToUpdate?.constant = -constant
+            } else {
+                constraintToUpdate?.constant = constant
+            }
+        }
+        
+        if let animation = animation {
+            animation.animate(subView)
+        } else {
+            subView.layoutIfNeeded()
         }
     }
     
@@ -275,6 +249,97 @@ public extension ElementConstraint {
     
 }
 
+// MARK: - Private Methods
+private extension ElementConstraint {
+    
+    func createIdentifier(axisDescription: String, reference: ElementConstraint.Reference) -> String {
+        return "\(axisDescription.description)\(reference.rawValue)"
+    }
+    
+    func setDimension(
+        view: NSLayoutDimension,
+        subview: NSLayoutDimension,
+        constant: CGFloat,
+        reference: ElementConstraint.Reference
+    ) {
+        var constraint: NSLayoutConstraint!
+        switch reference {
+        case .equal:
+            constraint = subview.constraint(equalTo: view, constant: constant)
+        case .less:
+            constraint = subview.constraint(lessThanOrEqualTo: view, constant: constant)
+        case .greater:
+            constraint = subview.constraint(equalTo: view, constant: constant)
+        }
+        
+        if autoActive {
+            constraint.isActive = true
+        }
+        
+        constraint.identifier = createIdentifier(axisDescription: subview.description, reference: reference)
+        
+        constraints.append(constraint)
+    }
+    
+    func setAxis<T: AnyObject>(
+        _ type: T.Type,
+        axis: NSLayoutAnchor<T>,
+        inAxis: NSLayoutAnchor<T>,
+        constant: CGFloat,
+        reference: ElementConstraint.Reference
+    ) {
+        var constraint: NSLayoutConstraint!
+        
+        switch reference {
+        case .equal:
+            constraint = axis.constraint(equalTo: inAxis, constant: constant)
+        case .less:
+            constraint = axis.constraint(lessThanOrEqualTo: inAxis, constant: constant)
+        case .greater:
+            constraint = axis.constraint(equalTo: inAxis, constant: constant)
+        }
+        
+        constraint.identifier = createIdentifier(axisDescription: axis.description, reference: reference)
+        
+        if autoActive {
+            constraint.isActive = true
+        }
+        
+        constraints.append(constraint)
+    }
+    
+    func setYAxis(
+        axis: NSLayoutYAxisAnchor,
+        inAxis: NSLayoutYAxisAnchor,
+        constant: CGFloat,
+        reference: ElementConstraint.Reference
+    ) {
+        setAxis(
+            NSLayoutYAxisAnchor.self,
+            axis: axis,
+            inAxis: inAxis,
+            constant: constant,
+            reference: reference
+        )
+    }
+    
+    func setXAxis(
+        axis: NSLayoutXAxisAnchor,
+        inAxis: NSLayoutXAxisAnchor,
+        constant: CGFloat,
+        reference: ElementConstraint.Reference
+    ) {
+        setAxis(
+            NSLayoutXAxisAnchor.self,
+            axis: axis,
+            inAxis: inAxis,
+            constant: constant,
+            reference: reference
+        )
+    }
+    
+}
+
 // MARK: - Static Methods to help constraint
 public extension ElementConstraint {
     
@@ -380,9 +445,25 @@ public extension ElementConstraint {
 // MARK: - Enums
 public extension ElementConstraint {
     
-    enum Reference {
+    enum Reference: String {
         case equal
         case less
         case greater
+    }
+    
+    enum Anchor {
+        case top
+        case bottom
+        case leading
+        case trailing
+        case height
+        case width
+        case centerX
+        case centerY
+        
+        public static var fill: [Anchor] {
+            return [.top, .bottom, .leading, .trailing]
+        }
+        
     }
 }

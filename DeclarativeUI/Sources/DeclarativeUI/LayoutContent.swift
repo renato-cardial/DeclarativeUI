@@ -8,20 +8,22 @@
 import UIKit
 
 public class LayoutContent {
-    
+    public private(set) var rendered: Bool = false
     public var contentView: UIView = FactoryView.makeView()
     public var stackView: UIStackView = FactoryView.makeStack()
     public var ignoreSafeArea: Bool = true
     
     public lazy var margin: CGFloat = DeclarativeUISettings.LayoutContent.margin
     public lazy var padding: CGFloat = DeclarativeUISettings.LayoutContent.padding
+    private var objectReferences: [AnyObject]? = []
     
     public init(
         _ mainView: UIView,
         _ completion: () -> RenderLayout?
     ) {
-        guard let renderLayout = completion() else { return }
+        guard rendered == false, let renderLayout = completion() else { return }
         setupView(in: mainView, elements: renderLayout.body)
+        rendered = true
     }
     
     private func setupView(in view: UIView, elements: [ElementView]) {
@@ -66,11 +68,25 @@ public class LayoutContent {
     private func addElements(_ elements: [ElementView]) {
         if elements.count == 1, let element = elements.first {
             setupFillView(view: contentView, subview: element.elementView, constant: margin)
+            keepReference(element)
+            element.afterEmbeded.forEach({ actionAfterEmbeded in
+                actionAfterEmbeded()
+            })
         } else {
             setupFillView(view: contentView, subview: stackView, constant: padding)
-            elements.forEach { element in
+            elements.forEach { element in                
                 stackView.addArrangedSubview(element.elementView)
+                self.keepReference(element)
+                element.afterEmbeded.forEach({ actionAfterEmbeded in
+                    actionAfterEmbeded()
+                })
             }
+        }
+    }
+    
+    private func keepReference(_ element: ElementView) {
+        element.references.forEach { reference in
+            objectReferences?.append(reference)
         }
     }
     

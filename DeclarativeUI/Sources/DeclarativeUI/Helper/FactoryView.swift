@@ -24,7 +24,7 @@ class FactoryView {
     static func makeStack(
         axis: NSLayoutConstraint.Axis = .vertical,
         distribution: UIStackView.Distribution = .fill,
-        alignment: UIStackView.Alignment = .center
+        alignment: UIStackView.Alignment = .fill
     ) -> UIStackView {
         let stackView: UIStackView = .init()
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -37,7 +37,25 @@ class FactoryView {
     static func makeScrollView() -> UIScrollView {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsHorizontalScrollIndicator = DeclarativeUISettings.Scroll.showsHorizontalScrollIndicator
+        scrollView.showsVerticalScrollIndicator = DeclarativeUISettings.Scroll.showsVerticalScrollIndicator
+        scrollView.bounces = DeclarativeUISettings.Scroll.bounce
+        
         return scrollView
+    }
+    
+    static func makeTableView(
+        delegate: UITableViewDelegate?,
+        dataSource: UITableViewDataSource?
+    ) -> UITableView {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.delegate = delegate
+        tableView.dataSource = dataSource
+        tableView.showsHorizontalScrollIndicator = DeclarativeUISettings.Scroll.showsHorizontalScrollIndicator
+        tableView.showsVerticalScrollIndicator = DeclarativeUISettings.Scroll.showsVerticalScrollIndicator
+        tableView.bounces = DeclarativeUISettings.Scroll.bounce
+        return tableView
     }
     
 }
