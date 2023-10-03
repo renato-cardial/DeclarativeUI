@@ -7,11 +7,44 @@
 
 import UIKit
 
+public protocol UpdatedString: AnyObject {
+    func updated(identifier: String, value: String?)
+}
+
+@propertyWrapper
+public class BindString {
+    
+    let identifier: String
+    var value: String?
+    
+    weak var delegate: UpdatedString?
+    
+    public init(identifier: String = UUID().uuidString, value: String? = nil) {
+        self.identifier = identifier
+        self.value = value
+    }
+    
+    public var wrappedValue: String? {
+        get {
+            return value
+        }
+        set {
+            value = newValue
+            delegate?.updated(identifier: identifier, value: value)
+        }
+    }
+    
+    public var projectedValue: String? {
+        return value
+    }
+    
+}
+
 /// This object is responsible to present text in layout
-public class Text: ElementView {
+public class Text: ElementView, UpdatedString {
     
     public override var elementView: UIView { return textLabel }
-    private lazy var textLabel: PaddingLabel = FactoryView.makeLabel()
+    lazy var textLabel: PaddingLabel = FactoryView.makeLabel()
     
     public var text: String? {
         didSet {
@@ -26,6 +59,16 @@ public class Text: ElementView {
         identifier = id
         textLabel.text = text
     }
+    
+    public init(_ text: BindString?) {
+        super.init()
+        text?.delegate = self
+    }
+    
+    public func updated(identifier: String, value: String?) {
+        textLabel.text = value
+    }
+    
 }
 
 // MARK: - Public Methods

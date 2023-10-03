@@ -8,15 +8,17 @@
 import UIKit
 import DeclarativeUI
 
+
+
 class ViewController: Layout, RenderLayout {
     
-    static var teste: Bool = true
+    @BindString var textMessage
     
     var body: LayoutBody {
         
-        ScrollView {
+        ScrollView { [self] in
             
-            Text("Mensagem de Texto", id: "textMessage")
+            Text(_textMessage)
             
             ScrollView(horizontal: true) {
                 ForEach(0..<6) { number in
@@ -36,12 +38,9 @@ class ViewController: Layout, RenderLayout {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        let textMessage: Text? = get("textMessage")
-        textMessage?.text = "You can change this form or"
-        
+        textMessage = "Dig Dig Dum"
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            self.get("textMessage", type: Text.self)?.text = "this form"
+            self.textMessage = "Text Changed"
         }
     }
     
