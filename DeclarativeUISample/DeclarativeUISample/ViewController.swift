@@ -8,13 +8,14 @@
 import UIKit
 import DeclarativeUI
 
-class ViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        print(DeclarativeUI().text)
+class ViewController: Layout, RenderLayout {
+    
+    var body: LayoutBody {
+        VStack {
+            Text("First element")
+            Text("Second element")
+        }
     }
-
 
 }
 
