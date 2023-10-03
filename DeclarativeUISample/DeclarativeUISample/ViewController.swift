@@ -13,35 +13,42 @@ class ViewController: Layout, RenderLayout {
     
     var body: LayoutBody {
         List {
-            ForEach(0..<100) { number in
-                self.create(number)
+            Text("Mensagem de Texto")
+            ScrollView(horizontal: true) {
+                ForEach(0..<3) { number in
+                    self.create(number)
+                }
             }
-        }        
-        .background(.red)
-        .selectedRow { id, element in
-            print("ID = \(id)")
+            .background(.systemPink)
+            .frame(height: 100)
+            
+            
+            ForEach(0..<100) { number in
+                Text("Row \(number)")
+                    .padding(20)
+                    .background(.cyan)
+            }
         }
     }
 
     func create(_ number: Int) -> ElementView {
-        if number % 2 == 0 {
+        /*if number % 2 == 0 {
             return Text("Element \(number)", id: "\(number)")
                 .padding(20)
                 .background(.yellow)
                 .frame(maxWidth: .infinity)
-        } else {
+        } else {*/
             return VStack(id: "\(number)", margin: 0, padding: 20) {
                 Text("Element \(number)")
                 Text("Descripton of Element")
             }
-            .background(.blue)
-            .padding(0, animation: .defaultAnimation())
-        }
+            .background( number % 2 == 0 ? .blue : .yellow)
+            .frame(width: view.frame.size.width)
+            //.padding(0, animation: .defaultAnimation())
+        //}
     }
     
 }
-
-
 
 extension ElementView {
     

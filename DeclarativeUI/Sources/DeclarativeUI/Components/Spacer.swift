@@ -18,7 +18,7 @@ public class Spacer: ElementView {
     /// - Parameters:
     ///   - vertical: Specific size of spacer vertically
     ///   - horizontal: Specific size of spacer horizontally
-    init(
+    public init(
         vertical: CGFloat? = nil,
         horizontal: CGFloat? = nil,
         id: String = UUID().uuidString

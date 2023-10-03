@@ -7,6 +7,20 @@
 
 import UIKit
 
+/**
+All content inside this component will be presented in a list, your content is reusable, so is indicate for large number of elements
+
+Example of use:
+ ```
+List {
+     ForEach(0..<100) { number in
+         Text("Row \(number)")
+             .padding(20)
+             .background(.cyan)
+     }
+}
+```
+*/
 public class List: ElementView {
     
     public override var elementView: UIView { return tableView }

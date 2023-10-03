@@ -33,4 +33,10 @@ public struct DeclarativeUISettings {
         public static var options: UIView.AnimationOptions = .curveLinear
     }
     
+    public struct Scroll {
+        public static var bounce: Bool = false
+        public static var showsHorizontalScrollIndicator: Bool = false
+        public static var showsVerticalScrollIndicator: Bool = false
+    }
+    
 }
