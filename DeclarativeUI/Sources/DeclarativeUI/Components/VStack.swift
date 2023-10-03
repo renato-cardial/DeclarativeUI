@@ -31,6 +31,8 @@ public class VStack: ElementView, RenderLayout {
     internal lazy var stackView: UIStackView = FactoryView.makeStack()
     
     // MARK: - Private Properties
+    private var containerConstraint: ElementConstraint?
+    private var stackConstraint: ElementConstraint?
     private var margin: CGFloat
     private var padding: CGFloat
     private var elementViews: [String: ElementView] = [:]
@@ -107,19 +109,43 @@ public extension VStack {
     
     @discardableResult
     /// Define the space between the edge of parent view
-    /// - Parameter marginValue: Space value to margin
+    /// - Parameters:
+    ///   - marginValue: Space value to margin
+    ///   - animated: Change margin with animation
+    ///   - animationDuration: Duration of animation
     /// - Returns: Self
-    func margin(_ marginValue: CGFloat) -> Self {
+    func margin(
+        _ marginValue: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
         self.margin = marginValue
+        containerConstraint?.update(
+            marginValue,
+            anchors: ElementConstraint.Anchor.fill,
+            reference: .equal,
+            animation: animation
+        )
         return self
     }
     
     @discardableResult
     /// Define the space between the content and the border of this element
-    /// - Parameter paddingValue: Space value to margin
+    /// - Parameters:
+    ///   - paddingValue: Space value to margin
+    ///   - animation: The configuration to animate padding constraints
     /// - Returns: Self
-    func padding(_ paddingValue: CGFloat) -> Self {
+    func padding(
+        _ paddingValue: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
         self.padding = paddingValue
+        
+        containerConstraint?.update(
+            paddingValue,
+            anchors: ElementConstraint.Anchor.fill,
+            reference: .equal,
+            animation: animation
+        )
         return self
     }
     
@@ -173,10 +199,12 @@ private extension VStack {
     }
     
     func setupConstraints() {
-        ElementConstraint(view: containerView, subview: stackView)
-            .fill(padding)
+        stackConstraint = ElementConstraint(
+            view: containerView,
+            subview: stackView
+        ).fill(padding)
         
-        let contentConstraint = ElementConstraint(
+        let containerConstraint = ElementConstraint(
             view: contentView,
             subview: containerView,
             safeArea: !_ignoreSafeArea
@@ -184,15 +212,17 @@ private extension VStack {
         
         switch verticalAlign {
         case .top:
-            contentConstraint.onTop(margin)
+            containerConstraint.onTop(margin)
         case .middle:
-            contentConstraint.onMiddle(margin)
+            containerConstraint.onMiddle(margin)
         case .bottom:
-            contentConstraint.onBottom(margin)
+            containerConstraint.onBottom(margin)
         case .center:
-            contentConstraint.center()
+            containerConstraint.center()
         case .fill:
-            contentConstraint.fill(margin)
+            containerConstraint.fill(margin)
         }
+        
+        self.containerConstraint = containerConstraint
     }
 }

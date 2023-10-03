@@ -30,13 +30,12 @@ class ViewController: Layout, RenderLayout {
                 .background(.yellow)
                 .frame(maxWidth: .infinity)
         } else {
-            return VStack(id: "\(number)", margin: 0, padding: 0) {
+            return VStack(id: "\(number)", margin: 0, padding: 20) {
                 Text("Element \(number)")
                 Text("Descripton of Element")
             }
             .background(.blue)
-            .margin(20)
-            .padding(20)
+            .padding(0, animation: .defaultAnimation())
         }
     }
     
