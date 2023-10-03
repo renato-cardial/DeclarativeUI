@@ -44,11 +44,13 @@ public class ScrollView: ElementView, RenderLayout {
     ///   - _:  Closure where you will put the elementViews to scroll, is recomended use only one element link VStack, List or others that works like container of the others elements
     public init(
         _ fillScreen: Bool = false,
+        id: String = UUID().uuidString,
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         self.blockElements = elements
         self.fillScreen = fillScreen
         super.init()
+        self.identifier = id
         setupView()
     }
 }
@@ -57,7 +59,7 @@ public class ScrollView: ElementView, RenderLayout {
 private extension ScrollView {
     
     func setupView()  {
-        elements = blockElements()
+        elements = blockElements().get()
         
         let haveOnlyOneElement = elements.count == 1
         let firstElementVStack = elements.first as? VStack

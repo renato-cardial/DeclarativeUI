@@ -39,6 +39,7 @@ public class HStack: VStack {
        - _ elements: Closure where you will put the elementViews to stack
     */
     override init(
+        id: String = UUID().uuidString,
         margin: CGFloat = DeclarativeUISettings.HStack.margin,
         padding: CGFloat = DeclarativeUISettings.HStack.padding,
         verticalAlignment: VerticalAlignment = DeclarativeUISettings.HStack.verticalAlignment,
@@ -46,6 +47,7 @@ public class HStack: VStack {
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         super.init(
+            id: id,
             margin: margin,
             padding: padding,
             verticalAlignment: verticalAlignment,

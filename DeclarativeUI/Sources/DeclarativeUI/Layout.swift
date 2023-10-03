@@ -14,6 +14,10 @@ open class Layout: UIViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+    }
+    
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         render(self as? RenderLayout)
     }
     

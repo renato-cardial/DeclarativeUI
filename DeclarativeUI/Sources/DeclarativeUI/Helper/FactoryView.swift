@@ -40,4 +40,17 @@ class FactoryView {
         return scrollView
     }
     
+    static func makeTableView(
+        delegate: UITableViewDelegate?,
+        dataSource: UITableViewDataSource?
+    ) -> UITableView {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.delegate = delegate
+        tableView.dataSource = dataSource
+        //tableView.estimatedRowHeight = 100
+        return tableView
+    }
+    
+    
 }

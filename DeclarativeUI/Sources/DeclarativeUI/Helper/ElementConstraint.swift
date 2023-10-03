@@ -19,12 +19,17 @@ public class ElementConstraint {
         view: UIView,
         subview: UIView,
         autoActive: Bool = true,
-        safeArea: Bool = false
+        safeArea: Bool = false,
+        forceAddSubview: Bool = false
     ) {
         self.view = view
         self.subView = subview
         self.autoActive = autoActive
         self.safeArea = safeArea
+        
+        if forceAddSubview {
+            subview.removeFromSuperview()
+        }
         
         if subview.superview == nil {
             view.addSubview(subview)

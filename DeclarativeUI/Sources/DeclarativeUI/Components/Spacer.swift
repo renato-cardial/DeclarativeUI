@@ -10,10 +10,7 @@ import UIKit
 /// Spacer to be used in VStack and HStack do fill space him
 public class Spacer: ElementView {
     
-    public override var elementView: UIView {
-        return view
-    }
-    
+    public override var elementView: UIView { return view }
     private lazy var view: UIView = FactoryView.makeView()
     
     /// Initialize the object that works line spacer, will be used in VStack and HStack component because
@@ -21,8 +18,13 @@ public class Spacer: ElementView {
     /// - Parameters:
     ///   - vertical: Specific size of spacer vertically
     ///   - horizontal: Specific size of spacer horizontally
-    init(vertical: CGFloat? = nil, horizontal: CGFloat? = nil) {
+    init(
+        vertical: CGFloat? = nil,
+        horizontal: CGFloat? = nil,
+        id: String = UUID().uuidString
+    ) {
         super.init()
+        self.identifier = id
         frame(width: horizontal, height: vertical)
     }
 }
