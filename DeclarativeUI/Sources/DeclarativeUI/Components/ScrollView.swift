@@ -34,6 +34,8 @@ public class ScrollView: ElementView, RenderLayout {
     // MARK: - Private Properties
     private let fillScreen: Bool
     private let horizontal: Bool
+    private let spacing: CGFloat
+    
     private var elements: [ElementView] = []
     private var blockElements: (() -> [ElementView])
     
@@ -42,16 +44,20 @@ public class ScrollView: ElementView, RenderLayout {
     /// All content inside this component will be presented in a scroll
     /// - Parameters:
     ///   - fillScreen: If true the content will fill all the height ScrollView
+    ///   - horizontal: Change the scroll to horizontal position
+    ///   - spacing: Define spacing between elements on scroll
     ///   - _:  Closure where you will put the elementViews to scroll, is recomended use only one element link VStack, List or others that works like container of the others elements
     public init(
         _ fillScreen: Bool = false,
         horizontal: Bool = false,
+        spacing: CGFloat = 0,
         id: String = UUID().uuidString,
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         self.blockElements = elements
         self.fillScreen = fillScreen
         self.horizontal = horizontal
+        self.spacing = spacing
         super.init()
         self.identifier = id
         setupView()
@@ -88,12 +94,21 @@ public extension ScrollView {
         return self
     }
     
+    @discardableResult
+    /// Define spacing between elements on scrollview
+    /// - Parameter space: Show or Not
+    /// - Returns: Self
+    func spacing(_ space: CGFloat) -> Self {
+        contentStackView.spacing = space
+        return self
+    }
 }
 
 // MARK: - Private Methods
 private extension ScrollView {
     
     func setupView()  {
+        
         elements = blockElements().get()
         
         let haveOnlyOneElement = elements.count == 1
@@ -103,6 +118,8 @@ private extension ScrollView {
             setupConstraints(view: element.elementView)
             return
         }
+        
+        contentStackView.spacing = spacing
         
         if horizontal {
             contentStackView.axis = .horizontal
