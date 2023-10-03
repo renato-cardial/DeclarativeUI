@@ -35,7 +35,7 @@ public class VStack: ElementView, RenderLayout {
     private var stackConstraint: ElementConstraint?
     private var margin: CGFloat
     private var padding: CGFloat
-    private var elementViews: [String: ElementView] = [:]
+
     private lazy var contentView: UIView = FactoryView.makeView()
     private lazy var containerView: UIView = FactoryView.makeView()
     
@@ -57,7 +57,7 @@ public class VStack: ElementView, RenderLayout {
        - _ elements: Closure where you will put the elementViews to stack
     */
     public init(
-        id: String = UUID().uuidString,
+        id: String = "",
         margin: CGFloat = DeclarativeUISettings.VStack.margin,
         padding: CGFloat = DeclarativeUISettings.VStack.padding,
         verticalAlignment: VerticalAlignment = DeclarativeUISettings.VStack.verticalAlignment,
@@ -172,7 +172,7 @@ private extension VStack {
     
     func addElement(_ element: ElementView) {
         stackView.addArrangedSubview(element.elementView)
-        elementViews.updateValue(element, forKey: element.identifier)
+        addChildren(element)
         element.afterEmbeded.forEach({ actionAfterEmbeded in
             actionAfterEmbeded()
         })

@@ -32,6 +32,14 @@ open class Layout: UIViewController {
         })
     }
     
+    public func get<T: ElementView>(_ identifier: String) -> T? {
+        return layout?.get(identifier) as? T
+    }
+    
+    public func get<T: ElementView>(_ identifier: String, type: T.Type) -> T? {
+        return layout?.get(identifier) as? T
+    }
+    
     deinit {
         print("Layout dealloced")
     }

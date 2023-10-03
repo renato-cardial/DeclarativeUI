@@ -51,7 +51,7 @@ public class ScrollView: ElementView, RenderLayout {
         _ fillScreen: Bool = false,
         horizontal: Bool = false,
         spacing: CGFloat = 0,
-        id: String = UUID().uuidString,
+        id: String = "",
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         self.blockElements = elements
@@ -127,12 +127,13 @@ private extension ScrollView {
         
         setupConstraints(view: contentStackView)
         elements.forEach { element in
+            addChildren(element)
             contentStackView.addArrangedSubview(element.elementView)
         }
     }
     
     func setupConstraints(view: UIView) {
-        let viewConstraint = ElementConstraint(view: scrollView, subview: view)
+        let viewConstraint = ElementConstraint(view: scrollView, subview: view, safeArea: false)
             .fill()
             
         if !horizontal {

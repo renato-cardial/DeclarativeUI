@@ -9,6 +9,9 @@ import UIKit
 
 public class LayoutContent {
     public private(set) var rendered: Bool = false
+    
+    private var elementViews: [String: ElementView] = [:]
+    
     public var contentView: UIView = FactoryView.makeView()
     public var stackView: UIStackView = FactoryView.makeStack()
     public var ignoreSafeArea: Bool = true
@@ -24,6 +27,35 @@ public class LayoutContent {
         guard rendered == false, let renderLayout = completion() else { return }
         setupView(in: mainView, elements: renderLayout.body)
         rendered = true
+    }
+    
+    public func get(_ identifier: String) -> ElementView? {
+        return get(identifier, elements: elementViews)
+    }
+    
+    private func get(_ identifier: String, elements: [String: ElementView]) -> ElementView? {
+        let elementList = elementViews.map { element in
+            element.value
+        }
+        
+        for element in elementList {
+            print("Teste: \(element.identifier)")
+            if element.identifier == identifier {
+                return element
+            }
+            
+            for children in element.children {
+                if children.key == identifier {
+                    print("Teste: \(children.key)")
+                    return children.value
+                }
+                
+                return get(identifier, elements: children.value.children)
+            }
+        }
+        
+        print("Teste: Nil")
+        return nil
     }
     
     private func setupView(in view: UIView, elements: [ElementView]) {
@@ -68,6 +100,7 @@ public class LayoutContent {
     private func addElements(_ elements: [ElementView]) {
         if elements.count == 1, let element = elements.first {
             setupFillView(view: contentView, subview: element.elementView, constant: margin)
+            updateElement(element)
             keepReference(element)
             element.afterEmbeded.forEach({ actionAfterEmbeded in
                 actionAfterEmbeded()
@@ -76,7 +109,8 @@ public class LayoutContent {
             setupFillView(view: contentView, subview: stackView, constant: padding)
             elements.forEach { element in                
                 stackView.addArrangedSubview(element.elementView)
-                self.keepReference(element)
+                updateElement(element)
+                keepReference(element)
                 element.afterEmbeded.forEach({ actionAfterEmbeded in
                     actionAfterEmbeded()
                 })
@@ -90,4 +124,14 @@ public class LayoutContent {
         }
     }
     
+    @discardableResult
+    private func updateElement(_ element: ElementView) -> Bool {
+        var key = element.identifier
+        if key.isEmpty {
+            key = UUID().uuidString
+        }
+        element.identifier = key
+        elementViews.updateValue(element, forKey: key)
+        return true
+    }
 }

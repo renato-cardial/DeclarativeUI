@@ -37,7 +37,7 @@ public class List: ElementView {
     )
     
     public init(
-        id: String = UUID().uuidString,
+        id: String = "",
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         self.blockElements = elements
@@ -51,7 +51,8 @@ public class List: ElementView {
     
     func loadData() {
         elements = blockElements()
-        listTableViewObject?.items = elements.get()
+        let items = elements.get()
+        listTableViewObject?.items = items
         tableView.reloadData()
     }
     

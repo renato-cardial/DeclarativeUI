@@ -13,9 +13,15 @@ public class Text: ElementView {
     public override var elementView: UIView { return textLabel }
     private lazy var textLabel: PaddingLabel = FactoryView.makeLabel()
     
+    public var text: String? {
+        didSet {
+            textLabel.text = text
+        }
+    }
+    
     /// Initialize the Text object
     /// Parameter text: Text will be presented in this element
-    public init(_ text: String?, id: String = UUID().uuidString) {
+    public init(_ text: String?, id: String = "") {
         super.init()
         identifier = id
         textLabel.text = text

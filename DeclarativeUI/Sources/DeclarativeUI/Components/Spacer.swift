@@ -21,7 +21,7 @@ public class Spacer: ElementView {
     public init(
         vertical: CGFloat? = nil,
         horizontal: CGFloat? = nil,
-        id: String = UUID().uuidString
+        id: String = ""
     ) {
         super.init()
         self.identifier = id

@@ -13,7 +13,7 @@ public class ElementView: Identifiable {
     // MARK: - Public Properties
     
     /// Identifier the element uniquely
-    public var identifier: String = UUID().uuidString
+    public var identifier: String = ""
     
     /// Respresent the UIView of elementView
     public var elementView: UIView { .init() }
@@ -22,6 +22,7 @@ public class ElementView: Identifiable {
     /// After this element to be added insider other element, this clousure will be called
     internal var afterEmbeded: [(() -> Void)]! = []
     internal var references: [AnyObject] = []
+    public private(set) var children: [String: ElementView] = [:]
     
     // MARK: - Methods that can be overridden
     /**
@@ -32,6 +33,19 @@ public class ElementView: Identifiable {
     public func background(_ color: UIColor) -> Self {
         elementView.backgroundColor = color
         return self
+    }
+    
+    func removeAllChildren() {
+        children.removeAll()
+    }
+    
+    func addChildren(_ element: ElementView) {
+        guard !element.identifier.isEmpty else { return }
+        children.updateValue(element, forKey: element.identifier)
+    }
+    
+    func addChildren(elements: [ElementView]) {
+        elements.forEach(addChildren)
     }
 }
 

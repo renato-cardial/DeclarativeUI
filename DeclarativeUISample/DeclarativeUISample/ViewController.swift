@@ -10,19 +10,22 @@ import DeclarativeUI
 
 class ViewController: Layout, RenderLayout {
     
+    static var teste: Bool = true
+    
     var body: LayoutBody {
         
-        List {
+        ScrollView {
             
-            Text("Mensagem de Texto")
+            Text("Mensagem de Texto", id: "textMessage")
+            
             ScrollView(horizontal: true) {
-                ForEach(0..<3) { number in
+                ForEach(0..<6) { number in
                     self.create(number)
                 }
             }
             .background(.systemPink)
             
-            ForEach(0..<100) { number in
+            ForEach(0..<20) { number in
                 Text("Row \(number)")
                     .padding(20)
                     .background(.cyan)
@@ -30,6 +33,18 @@ class ViewController: Layout, RenderLayout {
             
         }
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let textMessage: Text? = get("textMessage")
+        textMessage?.text = "You can change this form or"
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            self.get("textMessage", type: Text.self)?.text = "this form"
+        }
+    }
+    
         
     func create(_ number: Int) -> ElementView {
         if number % 2 == 0 {
