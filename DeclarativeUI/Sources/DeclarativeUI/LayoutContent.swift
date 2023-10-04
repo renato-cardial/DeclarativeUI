@@ -20,13 +20,39 @@ public class LayoutContent {
     public lazy var padding: CGFloat = DeclarativeUISettings.LayoutContent.padding
     private var objectReferences: [AnyObject]? = []
     
+    private var renderLayout: (() -> RenderLayout?)?
+    private let mainView: UIView
+    
     public init(
         _ mainView: UIView,
-        _ completion: () -> RenderLayout?
+        _ completion: @escaping () -> RenderLayout?
     ) {
-        guard rendered == false, let renderLayout = completion() else { return }
-        setupView(in: mainView, elements: renderLayout.body)
+        self.mainView = mainView
+        self.renderLayout = completion
+        guard rendered == false else { return }
+        redraw()
+    }
+    
+    public func redraw() {
+        guard let layout = renderLayout?() else { return }
+        
+        clearView()
+        setupView(in: mainView, elements: layout.body)
         rendered = true
+    }
+    
+    private func clearView() {
+        objectReferences?.removeAll()
+        objectReferences = nil
+        objectReferences = []
+        elementViews.forEach { key, value in
+            value.elementView.removeFromSuperview()
+        }
+        elementViews.removeAll()
+        
+        mainView.subviews.forEach { subview in
+            subview.removeFromSuperview()
+        }
     }
     
     public func get(_ identifier: String) -> ElementView? {
@@ -39,14 +65,12 @@ public class LayoutContent {
         }
         
         for element in elementList {
-            print("Teste: \(element.identifier)")
             if element.identifier == identifier {
                 return element
             }
             
             for children in element.children {
                 if children.key == identifier {
-                    print("Teste: \(children.key)")
                     return children.value
                 }
                 
@@ -54,7 +78,6 @@ public class LayoutContent {
             }
         }
         
-        print("Teste: Nil")
         return nil
     }
     

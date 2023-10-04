@@ -7,6 +7,76 @@
 
 import UIKit
 
+
+
+@propertyWrapper
+public class State<A, B> {
+    
+    weak var delegate: ElementBindValueChanged?
+    
+    let identifier: String = UUID().uuidString
+    lazy var elementBindValue: ElementBindValue<A> = .init(identifier: identifier)
+    
+    public var wrappedValue: A {
+        didSet {
+            elementBindValue.value = wrappedValue
+            delegate?.changed(elementBindValue)
+        }
+    }
+    
+    public init(wrappedValue: A) where A == B {
+        self.wrappedValue = wrappedValue
+    }
+    
+    public var projectedValue: A {
+        return wrappedValue
+    }
+}
+
+protocol ElementBindValueChanged: AnyObject {
+    func changed<T: ElementBindValueProtocol>(_ element: T)
+}
+
+protocol ElementBindValueProtocol {
+    associatedtype Valor
+    var identifier: String { get set }
+    var value: Valor? { get set }
+}
+
+struct ElementBindValue<T>: ElementBindValueProtocol {
+    typealias Valor = T
+    var identifier: String
+    var value: Valor?
+}
+
+@propertyWrapper
+public class BindValue<T> {
+    
+    weak var delegate: ElementBindValueChanged?
+    
+    var elementBindValue: ElementBindValue<T> = .init(identifier: "")
+    
+    public init(identifier: String = UUID().uuidString, value: T? = nil) {
+        self.elementBindValue.identifier = identifier
+        self.elementBindValue.value = value
+    }
+    
+    public var wrappedValue: T? {
+        get {
+            return elementBindValue.value
+        }
+        set {
+            elementBindValue.value = newValue
+            delegate?.changed(elementBindValue)
+        }
+    }
+    
+    public var projectedValue: T? {
+        return elementBindValue.value
+    }
+}
+
+
 public protocol UpdatedString: AnyObject {
     func updated(identifier: String, value: String?)
 }
@@ -41,7 +111,13 @@ public class BindString {
 }
 
 /// This object is responsible to present text in layout
-public class Text: ElementView, UpdatedString {
+public class Text: ElementView, UpdatedString, ElementBindValueChanged {
+    
+    typealias Valor = String
+    
+    func changed<T>(_ element: T) where T : ElementBindValueProtocol {
+        textLabel.text = element.value as? String
+    }
     
     public override var elementView: UIView { return textLabel }
     lazy var textLabel: PaddingLabel = FactoryView.makeLabel()
@@ -61,6 +137,11 @@ public class Text: ElementView, UpdatedString {
     }
     
     public init(_ text: BindString?) {
+        super.init()
+        text?.delegate = self
+    }
+    
+    public init(_ text: BindValue<String>?) {
         super.init()
         text?.delegate = self
     }

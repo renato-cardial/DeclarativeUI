@@ -19,10 +19,19 @@ open class Layout: UIViewController {
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         render(self as? RenderLayout)
+        
+        
+        let mirror = Mirror(reflecting: self)
+        mirror.children.forEach { child in
+            if let state = child.value as? State<String, String> {
+                state.delegate = self
+            }
+        }
     }
     
     open override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
+        
         layout = nil
     }
     
@@ -40,7 +49,19 @@ open class Layout: UIViewController {
         return layout?.get(identifier) as? T
     }
     
+    @objc func redraw() {
+        layout?.redraw()
+    }
+    
     deinit {
         print("Layout dealloced")
     }
+}
+
+extension Layout: ElementBindValueChanged {
+    
+    func changed<T>(_ element: T) where T : ElementBindValueProtocol {
+        layout?.redraw()
+    }
+    
 }
