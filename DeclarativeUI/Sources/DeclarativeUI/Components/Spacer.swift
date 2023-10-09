@@ -19,12 +19,11 @@ public class Spacer: ElementView {
     ///   - vertical: Specific size of spacer vertically
     ///   - horizontal: Specific size of spacer horizontally
     public init(
-        vertical: CGFloat? = nil,
+        _ vertical: CGFloat? = nil,
         horizontal: CGFloat? = nil,
         id: String = ""
     ) {
-        super.init()
-        self.identifier = id
+        super.init(identifier: id)
         frame(width: horizontal, height: vertical)
     }
 }

@@ -11,53 +11,54 @@ import DeclarativeUI
 class ViewController: Layout, RenderLayout {
     
     @State var textMessage: String = "Hello"
+    @State var response: [Person] = []
     
     var body: LayoutBody {
-        
-        ScrollView {
-            VStack { [self] in
-                Text($textMessage)
-                
-                ScrollView(horizontal: true) {
-                    ForEach(0..<6) { number in
-                        self.create(number)
-                    }
+    
+        List { [self] in
+            Text($textMessage)
+            
+            ScrollView(horizontal: true) {
+                ForEach(0..<6) { number in
+                    self.createViewToScroll(number)
                 }
-                .background(.systemPink)
-
-                ForEach(0..<20) { number in
-                    Text("Row \(number)")
-                        .padding(20)
-                        .background(.cyan)
-                }
-
             }
-
+            .frame(width: view.frame.size.width)
+            .frame(height: 200, animation: .defaultAnimation())
+            
+            let padding: CGFloat = 10
+            
+            ForEach(response) { index, item in
+                
+                VStack(id: "Item\(index)") {
+                    Text("Name: \(item.name)")
+                    Text("Age: \(item.age)")
+                    Divider()
+                        .toBottom(padding)
+                        .toTrailing(self.view.frame.size.width - (2 * padding))
+                        .toTrailing(0, animation: .defaultAnimation(
+                            duration: 0.3,
+                            delay: CGFloat(index) * 0.2)
+                        )
+                }
+                .padding(topAndHorizontal: padding)
+                .background(.blue)
+                .animates([
+                    .fadeInAnimation(duration: CGFloat(index) * 0.2),
+                    .changeBackgroundColor(.cyan, duration: CGFloat(index) * 0.2)
+                ])
+            }
+        }.selectedRow { id, element in
+            print(id)
+            print(element)
         }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            self.textMessage = "Text Changed"
-        }
-    }
-    
         
-    func create(_ number: Int) -> ElementView {
-        if number % 2 == 0 {
-            return Text("Element \(number)", id: "\(number)")
-                .padding(20)
-                .background(.yellow)
-                .frame(width: view.frame.size.width)
-        } else {
-            return VStack(id: "\(number)", margin: 0, padding: 20) {
-                Text("Element \(number)")
-                Text("Descripton of Element")
-            }
-            .background(.blue)
-            .frame(width: view.frame.size.width)
-        }
+        self.response = Person.random(20)
+        //self.textMessage = "Changed Title"
     }
     
 }

@@ -17,7 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if #unavailable(iOS 13.0) {
             let window = UIWindow(frame: UIScreen.main.bounds)
             window.rootViewController = ViewController()
-            window.rootViewController?.view.backgroundColor = .white
             window.makeKeyAndVisible()
             self.window = window
         }

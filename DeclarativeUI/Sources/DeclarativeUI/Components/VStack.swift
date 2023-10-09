@@ -68,9 +68,8 @@ public class VStack: ElementView, RenderLayout {
         self.padding = padding
         self.verticalAlign = verticalAlignment
         self.elements = elements
-        super.init()
+        super.init(identifier: id)
         
-        self.identifier = id
         stackView.spacing = spacing
         self.setupView()
     }
@@ -84,6 +83,7 @@ public class VStack: ElementView, RenderLayout {
         containerView.backgroundColor = color
         return self
     }
+    
 }
 
 // MARK: - Public Methods
@@ -131,7 +131,7 @@ public extension VStack {
     @discardableResult
     /// Define the space between the content and the border of this element
     /// - Parameters:
-    ///   - paddingValue: Space value to margin
+    ///   - paddingValue: Space value to padding
     ///   - animation: The configuration to animate padding constraints
     /// - Returns: Self
     func padding(
@@ -140,9 +140,106 @@ public extension VStack {
     ) -> Self {
         self.padding = paddingValue
         
-        containerConstraint?.update(
+        stackConstraint?.update(
             paddingValue,
             anchors: ElementConstraint.Anchor.fill,
+            reference: .equal,
+            animation: animation
+        )
+        return self
+    }
+    
+    @discardableResult
+    /// Define the space between the content and the border vertically of this element
+    /// - Parameters:
+    ///   - vertical: Space value to padding in vertical position
+    ///   - animation: The configuration to animate padding constraints
+    /// - Returns: Self
+    func padding(
+        vertical: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
+        stackConstraint?.update(
+            vertical,
+            anchors: [.top, .bottom],
+            reference: .equal,
+            animation: animation
+        )
+        return self
+    }
+    
+    @discardableResult
+    /// Define the space between the content and the border horizontal of this element
+    /// - Parameters:
+    ///   - horizontal: Space value to padding in horizontal position
+    ///   - animation: The configuration to animate padding constraints
+    /// - Returns: Self
+    func padding(
+        horizontal: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
+        stackConstraint?.update(
+            horizontal,
+            anchors: [.leading, .trailing],
+            reference: .equal,
+            animation: animation
+        )
+        return self
+    }
+    
+    @discardableResult
+    /// Define the space between the content and the border horizontal of this element
+    /// - Parameters:
+    ///   - paddingValue: Space value to padding in anchor positions position
+    ///   - anchors: The positions to apply paddingValue
+    ///   - animation: The configuration to animate padding constraints
+    /// - Returns: Self
+    func padding(
+        _ paddingValue: CGFloat,
+        anchors: [ElementConstraint.Anchor],
+        animation: ElementAnimation? = nil
+    ) -> Self {
+        stackConstraint?.update(
+            paddingValue,
+            anchors: anchors,
+            reference: .equal,
+            animation: animation
+        )
+        return self
+    }
+    
+    @discardableResult
+    /// Define the space between the content and the border horizontal of this element
+    /// - Parameters:
+    ///   - topAndHorizontal: Space value to padding in leading, trailing and top
+    ///   - animation: The configuration to animate padding constraints
+    /// - Returns: Self
+    func padding(
+        topAndHorizontal: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
+        stackConstraint?.update(
+            topAndHorizontal,
+            anchors: [.leading, .trailing, .top],
+            reference: .equal,
+            animation: animation
+        )
+        return self
+    }
+    
+    @discardableResult
+    /// Define the space between the content and the border horizontal of this element
+    /// - Parameters:
+    ///   - bottomAndHorizontal: Space value to padding in leading, trailing and top
+    ///   - animation: The configuration to animate padding constraints
+    /// - Returns: Self
+    func padding(
+        bottomAndHorizontal: CGFloat,
+        animation: ElementAnimation? = nil
+    ) -> Self {
+        stackConstraint?.update(
+            bottomAndHorizontal,
+            anchors: [.leading, .trailing, .bottom],
             reference: .equal,
             animation: animation
         )

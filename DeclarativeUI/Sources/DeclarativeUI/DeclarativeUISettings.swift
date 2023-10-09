@@ -15,10 +15,10 @@ public struct DeclarativeUISettings {
     }
     
     public struct VStack {
-        public static var margin: CGFloat = 16
+        public static var margin: CGFloat = 0
         public static var padding: CGFloat = 0
         public static var verticalAlignment: VerticalAlignment = .fill
-        public static var spacing: CGFloat = 10
+        public static var spacing: CGFloat = 0
     }
     
     public struct HStack {

@@ -7,31 +7,20 @@
 
 import UIKit
 
+public protocol ObservableData {}
+
 open class Layout: UIViewController {
     
     public var layout: LayoutContent?
     
-    open override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .white
-    }
-    
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         render(self as? RenderLayout)
-        
-        
-        let mirror = Mirror(reflecting: self)
-        mirror.children.forEach { child in
-            if let state = child.value as? State<String, String> {
-                state.delegate = self
-            }
-        }
+        setStateDelegates()
     }
     
     open override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
-        
         layout = nil
     }
     
@@ -49,8 +38,17 @@ open class Layout: UIViewController {
         return layout?.get(identifier) as? T
     }
     
-    @objc func redraw() {
+    public func redraw() {
         layout?.redraw()
+    }
+    
+    private func setStateDelegates() {
+        let mirror = Mirror(reflecting: self)
+        mirror.children.forEach { child in
+            if let state = child.value as? BindableObjectDelegate {
+                state.setDelegateBind(self)
+            }
+        }
     }
     
     deinit {
@@ -60,7 +58,7 @@ open class Layout: UIViewController {
 
 extension Layout: ElementBindValueChanged {
     
-    func changed<T>(_ element: T) where T : ElementBindValueProtocol {
+    public func changed<T>(_ element: T) where T : ElementBindValueProtocol {
         layout?.redraw()
     }
     

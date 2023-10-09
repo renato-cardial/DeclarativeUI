@@ -13,7 +13,7 @@ public class ElementView: Identifiable {
     // MARK: - Public Properties
     
     /// Identifier the element uniquely
-    public var identifier: String = ""
+    public var identifier: String
     
     /// Respresent the UIView of elementView
     public var elementView: UIView { .init() }
@@ -24,16 +24,13 @@ public class ElementView: Identifiable {
     internal var references: [AnyObject] = []
     public private(set) var children: [String: ElementView] = [:]
     
-    // MARK: - Methods that can be overridden
-    /**
-     Define the background color to elementView
-     - Parameters:
-       - color: Color
-    */
-    public func background(_ color: UIColor) -> Self {
-        elementView.backgroundColor = color
-        return self
+    public init(identifier: String) {
+        self.identifier = identifier
     }
+    
+    // MARK: - Methods that can be overridden
+    
+    
     
     func removeAllChildren() {
         children.removeAll()
@@ -47,10 +44,25 @@ public class ElementView: Identifiable {
     func addChildren(elements: [ElementView]) {
         elements.forEach(addChildren)
     }
+    
+    // MARK: - Public methods can be overrided
+    @discardableResult
+    /**
+     Define the background color to elementView
+     - Parameters:
+       - color: Color
+    */
+    public func background(_ color: UIColor) -> Self {
+        elementView.backgroundColor = color
+        return self
+    }
+    
+    
 }
 
 // MARK: - Public Methods
 public extension ElementView {
+    
     
     // MARK: - Dimensions
     
@@ -83,10 +95,12 @@ public extension ElementView {
     /// - Parameters:
     ///   - width: if passed will define this value to width else not define width
     ///   - height: if passed will define this value to height else not define height
+    ///   - animation:Animate the height/width changes
     /// - Returns: Self
-    func frame(width: CGFloat? = nil, height: CGFloat? = nil) -> Self {
+    func frame(width: CGFloat? = nil, height: CGFloat? = nil, animation: ElementAnimation? = nil) -> Self {
         setWidth(width)
         setHeight(height)
+        animation?.animate(elementView)
         return self
     }
     
@@ -116,6 +130,25 @@ public extension ElementView {
         return self
     }
     
+    @discardableResult
+    /// Animate element view
+    /// - Parameter animation: Implementation of animation to apply in element view
+    /// - Returns: Self
+    func animate(_ animation: ElementAnimation) -> Self {
+        animation.animate(elementView)
+        return self
+    }
+    
+    @discardableResult
+    /// Animate elements view
+    /// - Parameter animations: Implementation of animations to apply in element view
+    /// - Returns: Self
+    func animates(_ animations: [ElementAnimation]) -> Self {
+        animations.forEach { animation in
+            animation.animate(elementView)
+        }
+        return self
+    }
 }
 
 public extension Sequence where Element == ElementView {

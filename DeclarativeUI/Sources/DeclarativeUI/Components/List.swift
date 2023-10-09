@@ -41,8 +41,7 @@ public class List: ElementView {
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         self.blockElements = elements
-        super.init()
-        self.identifier = id
+        super.init(identifier: id)
         prepareTable()
         afterEmbeded.append { [weak self] in
             self?.loadData()
@@ -63,6 +62,7 @@ public class List: ElementView {
     
     private func prepareTable() {
         tableView.register(ListCell.self, forCellReuseIdentifier: ListCell.identifier)
+        tableView.separatorStyle = .none
         prepareTableEvents()
         if let listTableViewObject = listTableViewObject {
             references.append(listTableViewObject)

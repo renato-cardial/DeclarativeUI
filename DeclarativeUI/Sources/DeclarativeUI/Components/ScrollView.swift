@@ -58,8 +58,7 @@ public class ScrollView: ElementView, RenderLayout {
         self.fillScreen = fillScreen
         self.horizontal = horizontal
         self.spacing = spacing
-        super.init()
-        self.identifier = id
+        super.init(identifier: id)
         setupView()
     }
 }
@@ -143,7 +142,7 @@ private extension ScrollView {
         }
         
         if fillScreen || horizontal {
-            viewConstraint.height(reference: .greater)
+            viewConstraint.heightToParent(reference: .greater)
         }
     }
 }
