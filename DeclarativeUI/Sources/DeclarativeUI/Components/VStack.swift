@@ -57,7 +57,7 @@ public class VStack: ElementView, RenderLayout {
        - _ elements: Closure where you will put the elementViews to stack
     */
     public init(
-        id: String = "",
+        id: String = UUID().uuidString,
         margin: CGFloat = DeclarativeUISettings.VStack.margin,
         padding: CGFloat = DeclarativeUISettings.VStack.padding,
         verticalAlignment: VerticalAlignment = DeclarativeUISettings.VStack.verticalAlignment,
@@ -95,6 +95,15 @@ public extension VStack {
     /// - Returns: Self
     func align(_ alignment: UIStackView.Alignment) -> Self {
         stackView.alignment = alignment
+        return self
+    }
+    
+    @discardableResult
+    /// Define the horizontal alignment of elements inside this Element
+    /// - Parameter alignment: It's the same aligment of UIStackView
+    /// - Returns: Self
+    func distribution(_ distributionValue: UIStackView.Distribution) -> Self {
+        stackView.distribution = distributionValue
         return self
     }
     
@@ -269,10 +278,7 @@ private extension VStack {
     
     func addElement(_ element: ElementView) {
         stackView.addArrangedSubview(element.elementView)
-        addChildren(element)
-        element.afterEmbeded.forEach({ actionAfterEmbeded in
-            actionAfterEmbeded()
-        })
+        addChild(element)        
     }
     
     func setupView()  {

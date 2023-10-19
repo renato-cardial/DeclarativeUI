@@ -21,7 +21,6 @@ extension ViewController {
                 Text("Element \(number)")
                 Text("Descripton of Element")
             }
-            .padding(20)
             .background(.blue)
             .frame(width: width)
         }

@@ -38,8 +38,8 @@ public class HStack: VStack {
        - spacing: Spacing between elements on stack
        - _ elements: Closure where you will put the elementViews to stack
     */
-    override init(
-        id: String = "",
+    public override init(
+        id: String = UUID().uuidString,
         margin: CGFloat = DeclarativeUISettings.HStack.margin,
         padding: CGFloat = DeclarativeUISettings.HStack.padding,
         verticalAlignment: VerticalAlignment = DeclarativeUISettings.HStack.verticalAlignment,
@@ -56,6 +56,7 @@ public class HStack: VStack {
         )
         
         stackView.axis = .horizontal
+        stackView.alignment = .top
     }
     
 }

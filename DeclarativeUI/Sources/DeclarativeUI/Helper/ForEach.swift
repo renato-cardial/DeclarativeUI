@@ -34,4 +34,16 @@ public class ForEach: ElementView {
             elements.append(item)
         }
     }
+    
+    public func listSkeleton(numbers: Int, _ element: @escaping () -> ElementView) -> Self {
+        if elements.isEmpty {
+            for _ in 0..<numbers {
+                let item = element()
+                item.skeleton()
+                elements.append(item)
+            }
+        }
+        return self
+    }
+    
 }

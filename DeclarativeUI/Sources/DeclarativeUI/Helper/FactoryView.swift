@@ -21,6 +21,16 @@ class FactoryView {
         return label
     }
     
+    static func makeTextView() -> UITextView {
+        let textView = UITextView()
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.backgroundColor = .clear
+        textView.contentInset = .zero
+        textView.isEditable = false
+        textView.isScrollEnabled = false
+        return textView
+    }
+    
     static func makeStack(
         axis: NSLayoutConstraint.Axis = .vertical,
         distribution: UIStackView.Distribution = .fill,
@@ -57,5 +67,11 @@ class FactoryView {
         tableView.bounces = DeclarativeUISettings.Scroll.bounce
         return tableView
     }
-    
+ 
+    static func makeImageView() -> UIImageView {
+        let imageView: UIImageView = .init()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }
 }

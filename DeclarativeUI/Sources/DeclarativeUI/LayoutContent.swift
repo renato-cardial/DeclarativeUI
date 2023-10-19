@@ -125,18 +125,14 @@ public class LayoutContent {
             setupFillView(view: contentView, subview: element.elementView, constant: margin)
             updateElement(element)
             keepReference(element)
-            element.afterEmbeded.forEach({ actionAfterEmbeded in
-                actionAfterEmbeded()
-            })
+            element.callAfterEmbeds()
         } else {
             setupFillView(view: contentView, subview: stackView, constant: padding)
             elements.forEach { element in                
                 stackView.addArrangedSubview(element.elementView)
                 updateElement(element)
                 keepReference(element)
-                element.afterEmbeded.forEach({ actionAfterEmbeded in
-                    actionAfterEmbeded()
-                })
+                element.callAfterEmbeds()
             }
         }
     }

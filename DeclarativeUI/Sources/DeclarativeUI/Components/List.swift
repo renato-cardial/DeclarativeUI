@@ -30,6 +30,7 @@ public class List: ElementView {
     private var blockSelectedRow: ((_ id: String, _ element: ElementView) -> Void)?
     
     var listTableViewObject: ListTableViewObject? = .init()
+    private var skeletonActive: Bool = false
     
     private lazy var tableView: UITableView = FactoryView.makeTableView(
         delegate: listTableViewObject,
@@ -37,7 +38,7 @@ public class List: ElementView {
     )
     
     public init(
-        id: String = "",
+        id: String = UUID().uuidString,
         @LayoutBuilder _ elements: @escaping () -> [ElementView]
     ) {
         self.blockElements = elements
@@ -51,6 +52,15 @@ public class List: ElementView {
     func loadData() {
         elements = blockElements()
         let items = elements.get()
+        
+        removeAllChildren()
+        items.forEach { item in
+            addChild(item)
+            if skeletonActive {
+                item.skeleton()
+            }
+        }
+        
         listTableViewObject?.items = items
         tableView.reloadData()
     }
@@ -76,6 +86,12 @@ public class List: ElementView {
             let item = listTableViewObject.items[indexPath.row]
             self?.blockSelectedRow?(item.identifier, item)
         }
+    }
+    
+    @discardableResult
+    override public func skeleton(_ active: Bool = true) -> Self {
+        skeletonActive = active
+        return self
     }
         
 }

@@ -422,6 +422,7 @@ public extension ElementConstraint {
         
         switch reference {
         case .equal:
+            layoutDimension.constraint(equalToConstant: 0).isActive = false
             layoutDimension.constraint(equalToConstant: constant).isActive = true
         case .less:
             layoutDimension.constraint(lessThanOrEqualToConstant: constant).isActive = true

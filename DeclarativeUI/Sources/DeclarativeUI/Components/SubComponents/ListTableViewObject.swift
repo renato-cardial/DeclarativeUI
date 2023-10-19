@@ -34,6 +34,7 @@ extension ListTableViewObject: UITableViewDataSource {
         }
         let element = items[indexPath.row]
         cell.setContentView(element)
+        element.callAfterEmbeds()
         return cell
     }
     

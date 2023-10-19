@@ -8,7 +8,7 @@
 import UIKit
 
 /// The ElementView is the main object to use in our declarative view form to build layouts
-public class ElementView: Identifiable {
+open class ElementView: Identifiable {
     
     // MARK: - Public Properties
     
@@ -16,7 +16,7 @@ public class ElementView: Identifiable {
     public var identifier: String
     
     /// Respresent the UIView of elementView
-    public var elementView: UIView { .init() }
+    open var elementView: UIView { .init() }
     
     // MARK: - Internal Properties
     /// After this element to be added insider other element, this clousure will be called
@@ -30,19 +30,40 @@ public class ElementView: Identifiable {
     
     // MARK: - Methods that can be overridden
     
-    
-    
     func removeAllChildren() {
         children.removeAll()
     }
     
-    func addChildren(_ element: ElementView) {
+    public func addChildren(_ elements: [ElementView]) {
+        elements.forEach(addChild)
+    }
+    
+    func addChild(_ element: ElementView) {
         guard !element.identifier.isEmpty else { return }
         children.updateValue(element, forKey: element.identifier)
     }
     
     func addChildren(elements: [ElementView]) {
-        elements.forEach(addChildren)
+        elements.forEach(addChild)
+    }
+    
+    func callAfterEmbeds() {
+        afterEmbeded.forEach({ actionAfterEmbeded in
+            actionAfterEmbeded()
+        })
+        callChildrenAfterEmbeds(children: children)
+    }
+    
+    private func callChildrenAfterEmbeds(children: [String : ElementView]) {
+        children.forEach { key, value in
+            if value is Image {
+                print("Break")
+            }
+            value.afterEmbeded.forEach { action in
+                action()
+            }
+            callChildrenAfterEmbeds(children: value.children)
+        }
     }
     
     // MARK: - Public methods can be overrided
@@ -57,38 +78,87 @@ public class ElementView: Identifiable {
         return self
     }
     
+    @discardableResult
+    public func skeleton(_ active: Bool = true) -> Self {
+        guard active else {
+            hideSkeleton()
+            return self
+        }
+        
+        if let vStack = self as? VStack {
+            vStack.align(.leading)
+        }
+        
+        afterEmbeded.append { [weak self] in
+            guard let self = self else { return }
+            let skeletons = self.skeletonViews(in: self.elementView)
+            self.applySkeleton(skeletons: skeletons)
+        }
+        
+        return self
+    }
     
 }
 
 // MARK: - Public Methods
 public extension ElementView {
     
-    
     // MARK: - Dimensions
-    
+    @discardableResult
     /// Define the height of ElementView
     /// - Parameter constant: Value of height to apply
-    func height(_ constant: CGFloat) { ElementConstraint.height(constant, in: self) }
+    /// - Returns: Self
+    func height(_ constant: CGFloat) -> Self {
+        ElementConstraint.height(constant, in: self)
+        elementView.frame.size.height = constant
+        return self
+    }
     
+    @discardableResult
     /// Define the max height of ElementView
     /// - Parameter constant: Value of max height to apply
-    func maxHeight(_ constant: CGFloat) { ElementConstraint.maxHeight(constant, in: self) }
+    /// - Returns: Self
+    func maxHeight(_ constant: CGFloat) -> Self {
+        ElementConstraint.maxHeight(constant, in: self)
+        return self
+    }
     
+    @discardableResult
     /// Define the min height of ElementView
     /// - Parameter constant: Value of min height to apply
-    func minHeight(_ constant: CGFloat) { ElementConstraint.minHeight(constant, in: self) }
-    
+    /// - Returns: Self
+    func minHeight(_ constant: CGFloat) -> Self {
+        ElementConstraint.minHeight(constant, in: self)
+        return self
+    }
+   
+    @discardableResult
     /// Define the width of ElementView
     /// - Parameter constant: Value of width to apply
-    func width(_ constant: CGFloat) { ElementConstraint.width(constant, in: self) }
+    /// - Returns: Self
+    func width(_ constant: CGFloat) -> Self {
+        ElementConstraint.width(constant, in: self)
+        elementView.frame.size.width = constant
+        return self
+    }
     
+    @discardableResult
     /// Define the max width of ElementView
     /// - Parameter constant: Value of max width to apply
-    func maxWidth(_ constant: CGFloat) { ElementConstraint.maxWidth(constant, in: self) }
+    /// - Returns: Self
+    func maxWidth(_ constant: CGFloat) -> Self {
+        ElementConstraint.maxWidth(constant, in: self)
+        return self
+    }
     
+    @discardableResult
     /// Define the min width of ElementView
     /// - Parameter constant: Value of min width to apply
-    func minWidth(_ constant: CGFloat) { ElementConstraint.minWidth(constant, in: self) }
+    /// - Returns: Self
+    func minWidth(_ constant: CGFloat) -> Self {
+        ElementConstraint.minWidth(constant, in: self)
+        return self
+    }
     
     @discardableResult
     /// Define frame height and width of element its equivalent to call height(_ constant: CGFloat) and width(_ constant: CGFloat)
@@ -218,3 +288,97 @@ private extension ElementView {
     
 }
 
+// MARK: - Skeleton
+// Based on Artur Chabera post
+// Link: https://medium.com/@arturchabera/skeleton-view-alternative-for-loading-indicator-765d98cca2eb
+private extension ElementView {
+    
+    var skeletonLayerName: String {
+        return "skeletonLayerName"
+    }
+
+    var skeletonGradientName: String {
+        return "skeletonGradientName"
+    }
+    
+    func hideSkeleton() {
+        skeletonViews(in: elementView).forEach {
+            $0.layer.sublayers?.removeAll {
+                $0.name == skeletonLayerName || $0.name == skeletonGradientName
+            }
+        }
+    }
+    
+    func skeletonViews(in view: UIView) -> [UIView] {
+        var results = [UIView]()
+        
+        if view.subviews.isEmpty {
+            switch view {
+            case _ where view.isKind(of: PaddingLabel.self):
+                results += [view]
+            case _ where view.isKind(of: UIImageView.self):
+                results += [view]
+            case _ where view.isKind(of: UIButton.self):
+                results += [view]
+            default: break
+            }
+        } else {
+            
+            for subview in view.subviews as [UIView] {
+                switch subview {
+                case _ where subview.isKind(of: PaddingLabel.self):
+                    results += [subview]
+                case _ where subview.isKind(of: UIImageView.self):
+                    results += [subview]
+                case _ where subview.isKind(of: UIButton.self):
+                    results += [subview]
+                default: results += skeletonViews(in: subview)
+                }
+                
+            }
+        }
+        return results
+    }
+    
+    func applySkeleton(skeletons: [UIView]) {
+        elementView.layoutIfNeeded()
+        
+        let backgroundColor = UIColor(red: 210.0/255.0, green: 210.0/255.0, blue: 210.0/255.0, alpha: 1.0).cgColor
+        let highlightColor = UIColor(red: 235.0/255.0, green: 235.0/255.0, blue: 235.0/255.0, alpha: 1.0).cgColor
+
+        skeletons.forEach { skeleton in
+            
+            let frame = skeleton.bounds
+            
+            let skeletonLayer = CALayer()
+            skeletonLayer.backgroundColor = backgroundColor
+            skeletonLayer.name = skeletonLayerName
+            skeletonLayer.anchorPoint = .zero
+            skeletonLayer.frame.size = frame.size
+            
+            let gradientLayer = CAGradientLayer()
+            gradientLayer.colors = [backgroundColor, highlightColor, backgroundColor]
+            gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
+            gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
+            gradientLayer.frame = frame
+            gradientLayer.name = skeletonGradientName
+
+            skeleton.layer.mask = skeletonLayer
+            skeleton.layer.addSublayer(skeletonLayer)
+            skeleton.layer.addSublayer(gradientLayer)
+            skeleton.clipsToBounds = true
+            let width = frame.size.width
+
+            let animation = CABasicAnimation(keyPath: "transform.translation.x")
+            animation.duration = 3
+            animation.fromValue = -width
+            animation.toValue = width
+            animation.repeatCount = .infinity
+            animation.autoreverses = false
+            animation.fillMode = CAMediaTimingFillMode.forwards
+
+            gradientLayer.add(animation, forKey: "gradientLayerShimmerAnimation")
+        }
+    }
+    
+}

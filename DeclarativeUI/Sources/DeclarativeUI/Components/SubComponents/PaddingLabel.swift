@@ -41,7 +41,7 @@ class PaddingLabel: UILabel {
         )
     }
     
-    func setPadding(_ insets: UIEdgeInsets) {
+    func setPadding(insets: UIEdgeInsets) {
         self.insets = insets
     }
     

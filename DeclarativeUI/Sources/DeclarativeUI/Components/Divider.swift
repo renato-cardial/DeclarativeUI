@@ -13,7 +13,7 @@ public class Divider: ElementView {
     public override var elementView: UIView { return view }
     private let view: UIView = FactoryView.makeView()
     private let lineView: UIView = FactoryView.makeView()
-    
+    private let lineHeight: CGFloat
     private lazy var constraint: ElementConstraint = .init(
         view: view,
         subview: lineView
@@ -29,6 +29,7 @@ public class Divider: ElementView {
         spacing: CGFloat = 0,
         id: String = ""
     ) {
+        lineHeight = vertical
         super.init(identifier: id)
         background(color)
         constraint.height(vertical)
@@ -45,6 +46,7 @@ public class Divider: ElementView {
         spacing: CGFloat = 0,
         id: String = ""
     ) {
+        lineHeight = horizontal
         super.init(identifier: id)
         background(color)
         constraint.width(horizontal)
@@ -72,7 +74,7 @@ public class Divider: ElementView {
         _ spacing: CGFloat,
         animation: ElementAnimation? = nil
     ) -> Self {
-        constraint.update(spacing, anchors: [.top], reference: .equal, animation: animation)
+        space(spacing, anchors: [.top], animation: animation)
         return self
     }
     
@@ -81,7 +83,7 @@ public class Divider: ElementView {
         _ spacing: CGFloat,
         animation: ElementAnimation? = nil
     ) -> Self {
-        constraint.update(spacing, anchors: [.bottom], reference: .equal, animation: animation)
+        space(spacing, anchors: [.bottom], animation: animation)
         return self
     }
     
@@ -90,7 +92,7 @@ public class Divider: ElementView {
         _ spacing: CGFloat,
         animation: ElementAnimation? = nil
     ) -> Self {
-        constraint.update(spacing, anchors: [.trailing], reference: .equal, animation: animation)
+        space(spacing, anchors: [.trailing], animation: animation)
         return self
     }
     
@@ -99,7 +101,7 @@ public class Divider: ElementView {
         _ spacing: CGFloat,
         animation: ElementAnimation? = nil
     ) -> Self {
-        constraint.update(spacing, anchors: [.leading], reference: .equal, animation: animation)
+        space(spacing, anchors: [.leading], animation: animation)
         return self
     }
     
